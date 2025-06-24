@@ -18,17 +18,14 @@ ratios = {
 }
 str_ratios = list(ratios.keys())
 sdxl_dimensions = [
-    "1024 x 1024",
-    "896 x 1152",  # 7:9
-    "832 x 1216",  # 13:19
-    "768 x 1344",  # 4:7
-    "640 x 1536",  # 5:12
-    # Common dimensions but not SDXL compatible
-    # "1144 x 915", "915 x 1144",  # 4:5
-    # "1182 x 886", "886 x 1182",  # 3:4
-    # "1254 x 836", "836 x 1254",  # 2:3
-    # "1440 x 810", "810 x 1440",  # 9:16
-    # "1564 x 670", "670 x 1564",  # 9:21
+    "480 x 832",  #vertical long
+    "512 x 512",  #square
+    "496 x 640",  #vertical short
+    "640 x 496",  #horizontal short
+    "832 x 480",  #horizontal long
+    "496 x 660",  #vertical short2
+    "660 x 496",  #horizontal short2
+   
 ]
 
 

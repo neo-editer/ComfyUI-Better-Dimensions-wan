@@ -41,52 +41,62 @@ wan_dimensions = [
 
 def apply_ratio(width, height, ratio, enforce_width: bool = True, swapped: bool = False):
     r_width, r_height = ratio
-    print(f"better_dims > apply_ratio: r_w={r_width}, r_h={r_height}")
     if enforce_width:
         factor = width // r_width
-        ret_tuple = (width, (factor * r_height)) if not swapped else ((factor * r_height), width)
-        print(f"better_dims > apply_ratio: swapped={swapped} ret_tuple={ret_tuple}")
-        return ret_tuple
+        return (width, (factor * r_height)) if not swapped else ((factor * r_height), width)
     else:
         factor = height // r_height
-        ret_tuple = ((factor * r_width), height) if not swapped else (height, (factor * r_width))
-        print(f"better_dims > apply_ratio: swapped={swapped} ret_tuple={ret_tuple}")
-        return ret_tuple
+        return ((factor * r_width), height) if not swapped else (height, (factor * r_width))
 
 
 def apply_pure_ratio(ratio, ratio_scale: float = 1.0, swapped: bool = False):
-    global pxl_base
     r_width, r_height = ratio
     ratioed_width = int(r_width * pxl_base * ratio_scale)
     ratioed_height = int(r_height * pxl_base * ratio_scale)
-    print(f"better_dims > apply_pure_ratio: ratioed_width={ratioed_width} ratioed_height={ratioed_height}")
     return (ratioed_height, ratioed_width) if swapped else (ratioed_width, ratioed_height)
 
 
-class PresetDimensions:
+class SDXLDimensions:
     def __init__(self):
         pass
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {
             "required": {
-                "model": (["SDXL", "WAN"],),
-                "dimensions": (sdxl_dimensions + wan_dimensions,),
+                "dimensions": (sdxl_dimensions,),
                 "order": (["default (width,height)", "swapped (height,width)"],),
             }
         }
 
     RETURN_TYPES = ("INT", "INT")
     RETURN_NAMES = ("width", "height")
-
     FUNCTION = "better_dimensions"
     CATEGORY = "BetterDimensions"
 
-    def better_dimensions(self, model: str = "", dimensions: str = "", order: str = ""):
-        dims_list = sdxl_dimensions if model == "SDXL" else wan_dimensions
-        if dimensions not in dims_list:
-            raise ValueError(f"Invalid dimensions: {dimensions} for model: {model}")
+    def better_dimensions(self, dimensions: str = "", order: str = ""):
+        return tuple([int(dim) for dim in dimensions.split(" x ")[::-1 if order == "swapped (height,width)" else 1]])
+
+
+class FLUXDimensions:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "dimensions": (wan_dimensions,),
+                "order": (["default (width,height)", "swapped (height,width)"],),
+            }
+        }
+
+    RETURN_TYPES = ("INT", "INT")
+    RETURN_NAMES = ("width", "height")
+    FUNCTION = "better_dimensions"
+    CATEGORY = "BetterDimensions"
+
+    def better_dimensions(self, dimensions: str = "", order: str = ""):
         return tuple([int(dim) for dim in dimensions.split(" x ")[::-1 if order == "swapped (height,width)" else 1]])
 
 
@@ -95,7 +105,7 @@ class PureRatio:
         pass
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {
             "required": {
                 "ratio": (str_ratios[1:],),
@@ -114,7 +124,6 @@ class PureRatio:
 
     RETURN_TYPES = ("INT", "INT")
     RETURN_NAMES = ("width", "height")
-
     FUNCTION = "better_dimensions"
     CATEGORY = "BetterDimensions"
 
@@ -130,23 +139,11 @@ class BetterDimensions:
         pass
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {
             "required": {
-                "width": ("INT", {
-                    "default": 1024,
-                    "min": 64,
-                    "max": 2 ** 20,
-                    "step": 2,
-                    "display": "number",
-                }),
-                "height": ("INT", {
-                    "default": 1024,
-                    "min": 64,
-                    "max": 2 ** 20,
-                    "step": 2,
-                    "display": "number",
-                }),
+                "width": ("INT", {"default": 1024, "min": 64, "max": 2 ** 20, "step": 2}),
+                "height": ("INT", {"default": 1024, "min": 64, "max": 2 ** 20, "step": 2}),
                 "ratio": (str_ratios,),
                 "enforce_dimension": (["width", "height"],),
                 "order": (["default (width,height)", "swapped (height,width)"],),
@@ -155,7 +152,6 @@ class BetterDimensions:
 
     RETURN_TYPES = ("INT", "INT")
     RETURN_NAMES = ("width", "height")
-
     FUNCTION = "better_dimensions"
     CATEGORY = "BetterDimensions"
 
@@ -172,14 +168,17 @@ class BetterDimensions:
         return apply_ratio(w, h, tuple_ratio, enforce_width=enforce_width, swapped=swapped)
 
 
+# Register the nodes with custom names
 NODE_CLASS_MAPPINGS = {
     "BetterImageDimensions": BetterDimensions,
-    "PresetDimensions": PresetDimensions,
     "PureRatio": PureRatio,
+    "SDXLdimensions": SDXLDimensions,
+    "FLUXdimensions": FLUXDimensions,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "BetterImageDimensions": "Better Image Dimensions",
-    "PresetDimensions": "Preset Dimensions",
     "PureRatio": "Dimensions by Ratio",
+    "SDXLDimensions": "SDXL Dimensions",
+    "FLUXDimensions": "FLUX Dimensions",
 }

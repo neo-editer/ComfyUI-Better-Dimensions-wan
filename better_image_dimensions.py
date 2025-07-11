@@ -25,6 +25,7 @@ sdxl_dimensions = [
     "832 x 1216",  # 13:19
     "768 x 1344",  # 4:7
     "640 x 1536",  # 5:12
+    "1216 x 832",
 ]
 
 # WAN Dimensions
@@ -56,7 +57,7 @@ def apply_pure_ratio(ratio, ratio_scale: float = 1.0, swapped: bool = False):
     return (ratioed_height, ratioed_width) if swapped else (ratioed_width, ratioed_height)
 
 
-class SDXLDimensions:
+class SDXLDimensions_simple:
     def __init__(self):
         pass
 
@@ -78,7 +79,7 @@ class SDXLDimensions:
         return tuple([int(dim) for dim in dimensions.split(" x ")[::-1 if order == "swapped (height,width)" else 1]])
 
 
-class FLUXDimensions:
+class SDXLDimensions:
     def __init__(self):
         pass
 
@@ -172,13 +173,13 @@ class BetterDimensions:
 NODE_CLASS_MAPPINGS = {
     "BetterImageDimensions": BetterDimensions,
     "PureRatio": PureRatio,
-    "SDXLdimensions": SDXLDimensions,
-    "FLUXdimensions": FLUXDimensions,
+    "SDXLDimensions_simple": SDXLDimensions_simple,
+    "SDXLDimensions": SDXLDimensions,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "BetterImageDimensions": "Better Image Dimensions",
     "PureRatio": "Dimensions by Ratio",
-    "SDXLDimensions": "SDXL Dimensions",
-    "FLUXDimensions": "FLUX Dimensions",
+    "SDXLDimensions_simple": "wan Dimensions",
+    "SDXLDimensions": "sdxl Dimensions",
 }

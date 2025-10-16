@@ -28,7 +28,7 @@ sdxl_dimensions = [
     "1216 x 832",
 ]
 
-# WAN Dimensions
+# WAN Dimensions (original max 832)
 wan_dimensions = [
     "480 x 832",  # vertical long
     "512 x 512",  # square
@@ -37,6 +37,22 @@ wan_dimensions = [
     "832 x 480",  # horizontal long
     "496 x 660",  # vertical short2
     "660 x 496",  # horizontal short2
+    "480 x 580",  # vertical almost square
+    "580 x 480",  # horizontal almost square
+]
+
+# WAN Dimensions 720/1280 (Scaled up to max 1280, incorporating 9:16 ratio)
+# The dimensions are scaled by approx 1.5x and adjusted to be multiples of 8.
+wan_dimensions_720 = [
+    "720 x 1280",  # vertical long (9:16)
+    "768 x 768",   # square (scaled from 512x512)
+    "744 x 960",   # vertical short (scaled from 496x640)
+    "960 x 744",   # horizontal short
+    "1280 x 720",  # horizontal long (16:9)
+    "744 x 992",   # vertical short2 (scaled from 496x660)
+    "992 x 744",   # horizontal short2
+    "720 x 870",  # vertical almost square
+    "870 x 720",  # horizontal almost square
 ]
 
 
@@ -58,6 +74,7 @@ def apply_pure_ratio(ratio, ratio_scale: float = 1.0, swapped: bool = False):
 
 
 class SDXLDimensions_simple:
+    # This class seems to be the one using 'sdxl_dimensions'
     def __init__(self):
         pass
 
@@ -80,6 +97,7 @@ class SDXLDimensions_simple:
 
 
 class SDXLDimensions:
+    # This class seems to be the one using 'wan_dimensions' (the original list)
     def __init__(self):
         pass
 
@@ -98,6 +116,30 @@ class SDXLDimensions:
     CATEGORY = "BetterDimensions"
 
     def better_dimensions(self, dimensions: str = "", order: str = ""):
+        return tuple([int(dim) for dim in dimensions.split(" x ")[::-1 if order == "swapped (height,width)" else 1]])
+
+
+class WANDimensions_720:
+    # New class for wan_dimensions_720 list
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "dimensions": (wan_dimensions_720,),
+                "order": (["default (width,height)", "swapped (height,width)"],),
+            }
+        }
+
+    RETURN_TYPES = ("INT", "INT")
+    RETURN_NAMES = ("width", "height")
+    FUNCTION = "better_dimensions"
+    CATEGORY = "BetterDimensions"
+
+    def better_dimensions(self, dimensions: str = "", order: str = ""):
+        # Reuses the exact same dimension parsing logic
         return tuple([int(dim) for dim in dimensions.split(" x ")[::-1 if order == "swapped (height,width)" else 1]])
 
 
@@ -175,11 +217,13 @@ NODE_CLASS_MAPPINGS = {
     "PureRatio": PureRatio,
     "SDXLDimensions_simple": SDXLDimensions_simple,
     "SDXLDimensions": SDXLDimensions,
+    "WANDimensions_720": WANDimensions_720, # The new node class
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "BetterImageDimensions": "Better Image Dimensions",
     "PureRatio": "Dimensions by Ratio",
-    "SDXLDimensions_simple": "wan Dimensions",
-    "SDXLDimensions": "sdxl Dimensions",
+    "SDXLDimensions_simple": "sdxl Dimensions",
+    "SDXLDimensions": "wan Dimensions",
+    "WANDimensions_720": "wan Dimensions 720", # The new node display name
 }
